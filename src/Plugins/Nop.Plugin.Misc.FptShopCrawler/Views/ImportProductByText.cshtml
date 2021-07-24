@@ -1,0 +1,13 @@
+﻿@{
+    Layout = "_ConfigurePlugin";
+}
+@using Nop.Plugin.Misc.FptShopCrawler.Models
+
+@model ImportRequestModel
+
+<form asp-controller="FptShopCrawler" asp-action="ImportProductByText" method="post">
+    <textarea asp-for="JsonText" class="description"></textarea>
+    <button type="submit" class="btn bg-red">
+        Import product
+    </button>
+</form>
