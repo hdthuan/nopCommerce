@@ -6,6 +6,7 @@ namespace Nop.Plugin.Misc.FptShopCrawler.Services
 {
     public interface IFptShopImportService
     {
-        Task<Product> ImportAsync(string json);
+        Task<Product> ImportAsync(string json, string imageFolder = null);
+        Task ImportBackgroundAsync();
     }
 }

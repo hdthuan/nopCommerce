@@ -26,14 +26,18 @@ namespace Nop.Plugin.Misc.FptShopCrawler
         #region Fields
 
         private readonly IWebHelper _webHelper;
+        private readonly IScheduleTaskService _scheduleTaskService;
 
         #endregion
 
         #region Ctor
 
-        public FptShopCrawlerPlugin(IWebHelper webHelper)
+        public FptShopCrawlerPlugin(IWebHelper webHelper,
+            IScheduleTaskService scheduleTaskService
+            )
         {
             _webHelper = webHelper;
+            _scheduleTaskService = scheduleTaskService;
         }
 
         #endregion
@@ -67,13 +71,25 @@ namespace Nop.Plugin.Misc.FptShopCrawler
 
             return Task.CompletedTask;
         }
-
+        private string _backgroundTaskType = "Nop.Plugin.Misc.FptShopCrawler.Services.ImportBackgroundTask";
         /// <summary>
         /// Install the plugin
         /// </summary>
         /// <returns>A task that represents the asynchronous operation</returns>
         public override async Task InstallAsync()
         {
+            //install import background task
+            if (await _scheduleTaskService.GetTaskByTypeAsync(_backgroundTaskType) == null)
+            {
+                await _scheduleTaskService.InsertTaskAsync(new ScheduleTask
+                {
+                    Enabled = true,
+                    Seconds = 60,
+                    Name = "FptShopImportBackgroundTaskName",
+                    Type = _backgroundTaskType,
+                });
+            }
+
             await base.InstallAsync();
         }
 
@@ -83,6 +99,11 @@ namespace Nop.Plugin.Misc.FptShopCrawler
         /// <returns>A task that represents the asynchronous operation</returns>
         public override async Task UninstallAsync()
         {
+            //schedule task
+            var task = await _scheduleTaskService.GetTaskByTypeAsync(_backgroundTaskType);
+            if (task != null)
+                await _scheduleTaskService.DeleteTaskAsync(task);
+
             await base.UninstallAsync();
         }
 
